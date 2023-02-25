@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,30 +84,22 @@ public class RecipeService {
                     " Double check that it is correct. Or maybe you meant to POST a recipe not PATCH one.");
         }
     }
-//    Question five
+    public Double averageReview (Recipe recipe) throws NoSuchRecipeException{
+        Collection<Review> reviews = recipe.getReviews();
+        if(recipe.getReviews() == null || reviews.isEmpty()) {
+            return (double) 0;
 
-    public Recipe getRecipeByUserName(String userName) throws NoSuchRecipeException {
-        List<Recipe> findBy = recipeRepo.findByNameContainingIgnoreCase(userName);
-//
-        if (findBy == null) {
-            throw new NoSuchRecipeException("No recipe with userName " + userName + " could be found.");
-        } else {
-            return (Recipe) findBy;
+        } double totalRatings = 0;
+        for(Review review: reviews){
+            totalRatings+= review.getRating();
         }
-
-        //Question 6
-    }
-
-    public List<Recipe> getUserNameByReview(long id, String userName, int review) {
-        return getUserNameByReview(id, userName, review);
-    }
+        return totalRatings /reviews.size();
 
     }
 
 
 
-
-
+}
 
 
 

@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface RecipeRepo extends JpaRepository<Recipe, Long> {
     List<Recipe> findByNameContainingIgnoreCase(String name);
-    Double getAverageRating(Recipe recipe);
+
 
 }
 

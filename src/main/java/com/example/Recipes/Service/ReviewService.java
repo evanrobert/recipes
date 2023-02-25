@@ -77,45 +77,5 @@ public class ReviewService {
         reviewRepo.save(reviewToUpdate);
         return reviewToUpdate;
     }
-    //Question 1
 
-public Double getAverageRating(Recipe recipe) {
-    if (recipe.getReviews() == null || recipe.getReviews().isEmpty()) {
-        return null;
-    }
-
-    int totalRating = 0;
-    for (Review review : recipe.getReviews()) {
-        totalRating += review.getRating();
-    }
-
-    return (double) totalRating / recipe.getReviews().size();
 }
-
-
-
-
-
-
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
