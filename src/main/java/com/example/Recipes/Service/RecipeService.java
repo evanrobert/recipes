@@ -38,14 +38,15 @@ public class RecipeService {
         recipe.generateLocationURI();
         return recipe;
     }
+
     //Question 5
-    public List <Recipe> getRecipeByUserName(String userName) throws NoSuchRecipeException {
+    public List<Recipe> getRecipeByUserName(String userName) throws NoSuchRecipeException {
         List<Recipe> recipe = recipeRepo.findByNameContainingIgnoreCase(userName);
         if (recipe.isEmpty()) {
             throw new NoSuchRecipeException("No recipe with " + userName + " could be found");
 
         }
-     return  recipe;
+        return recipe;
 
 
     }
@@ -95,19 +96,22 @@ public class RecipeService {
                     " Double check that it is correct. Or maybe you meant to POST a recipe not PATCH one.");
         }
     }
-//    Question 1
-    public Integer averageReview (Recipe recipe) throws NoSuchRecipeException{
-        Collection<Review> reviews = recipe.getReviews();
-        if(recipe.getReviews() == null || reviews.isEmpty()) {
-            return  0;
 
-        } int totalRatings = 0;
-        for(Review review: reviews){
-            totalRatings+= review.getRating();
+    //    Question 1
+    public Integer averageReview(Recipe recipe) throws NoSuchRecipeException {
+        Collection<Review> reviews = recipe.getReviews();
+        if (recipe.getReviews() == null || reviews.isEmpty()) {
+            return 0;
+
         }
-        return totalRatings /reviews.size();
+        int totalRatings = 0;
+        for (Review review : reviews) {
+            totalRatings += review.getRating();
+        }
+        return totalRatings / reviews.size();
 
     }
+}
 
 
 
