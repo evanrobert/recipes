@@ -2,13 +2,14 @@ package com.example.Recipes.Controller;
 
 import com.example.Recipes.Exceptions.NoSuchRecipeException;
 import com.example.Recipes.Models.Recipe;
-import com.example.Recipes.Repos.RecipeRepo;
+import com.example.Recipes.Models.Review;
 import com.example.Recipes.Service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,8 +78,9 @@ public class RecipeController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+//    Question 2
     @GetMapping("/minRating")
-    public List<Recipe> getRecipeByMinimum(@RequestParam( "RecipeByMinimum") double RecipeByMinimum) throws NoSuchRecipeException {
+    public List<Recipe> getRecipeByMinimum(@RequestParam( required = false) double RecipeByMinimum) throws NoSuchRecipeException {
         List<Recipe> recipes = recipeService.getAllRecipes();
         return recipes.stream().filter(recipe -> {
             try {
@@ -89,7 +91,28 @@ public class RecipeController {
         }).collect(Collectors.toList());
 
     }
-}
+    //Question 3
+    @GetMapping("/search/{name}/{rating}")
+    public List<Recipe> getNameAndRating( @PathVariable String name, @PathVariable double rating) throws NoSuchRecipeException {
+        List<Recipe> recipes = recipeService.getRecipesByName(name);
+        List<Recipe> filter = new ArrayList<>();
+        for (Recipe recipe : recipes) {
+            if (recipeService.averageReview(recipe) >= rating) {
+                filter.add(recipe);
+            }
+        }
+
+                return filter;
+    }
+    //Question 6
+    @GetMapping("search/{name}")
+    public List<Recipe> getRecipeByUsername(@PathVariable String userName, @PathVariable double rating) throws NoSuchRecipeException{
+        List<Recipe> userNames = recipeService.getRecipeByUserName(userName);
+        return userNames;
+    }
+
+    }
+
 
 
 

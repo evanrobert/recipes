@@ -25,12 +25,14 @@ public class Review {
 
     @NotNull
     private String description;
-
+//Question 8
     public void setRating(int rating) {
-        if (rating <= 0 || rating > 10) {
+        if (rating <= 1 || rating > 10) {
+
             throw new IllegalStateException("Rating must be between 0 and 10.");
         }
         this.rating = rating;
     }
 }
+
 
