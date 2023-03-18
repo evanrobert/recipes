@@ -2,7 +2,7 @@ package com.example.Recipes.Controller;
 
 import com.example.Recipes.Exceptions.NoSuchRecipeException;
 import com.example.Recipes.Models.Recipe;
-import com.example.Recipes.Models.Review;
+
 import com.example.Recipes.Service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,7 +51,7 @@ public class RecipeController {
     @GetMapping("/search/{name}")
     public ResponseEntity<?> getRecipesByName(@PathVariable("name") String name) {
         try {
-            List<Recipe> matchingRecipes = recipeService.getRecipesByName(name);
+            ArrayList<Recipe> matchingRecipes = (ArrayList<Recipe>) recipeService.getRecipesByName(name);
             return ResponseEntity.ok(matchingRecipes);
         } catch (NoSuchRecipeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -62,8 +62,7 @@ public class RecipeController {
     public ResponseEntity<?> deleteRecipeById(@PathVariable("id") Long id) {
         try {
             Recipe deletedRecipe = recipeService.deleteRecipeById(id);
-            return ResponseEntity.ok("The recipe with ID " + deletedRecipe.getId() +
-                    " and name " + deletedRecipe.getName() + " was deleted.");
+            return ResponseEntity.ok("The recipe with ID " + deletedRecipe.getId() + " and name " + deletedRecipe.getName() + " was deleted");
         } catch (NoSuchRecipeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -77,7 +76,14 @@ public class RecipeController {
         } catch (NoSuchRecipeException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+
     }
+
+
+
+
+
+
 
     //    Question 2
     @GetMapping("/minRating")
@@ -106,15 +112,24 @@ public class RecipeController {
 
         return filter;
     }
-}
-    //Question 6
-//    @GetMapping("search/{name}")
-//    public List<Recipe> getRecipeByUsername(@PathVariable String userName, @PathVariable double rating) throws NoSuchRecipeException{
-//        List<Recipe> userNames = recipeService.getRecipeByUserName(userName);
-//        return userNames;
-//    }
-//
-//    }
+
+   // Question 6
+//   @GetMapping("/search/{userName}")
+//   public List<Recipe> getRecipeByUsername(@PathVariable String userName, @RequestParam(required = false) Double rating) throws NoSuchRecipeException {
+//       List<Recipe> userRecipes = recipeService.getRecipeByUserName(userName);
+//       if (rating != null) {
+//           userRecipes = userRecipes.stream().filter(recipe -> {
+//               try {
+//                   return recipeService.averageReview(recipe) >= rating;
+//               } catch (NoSuchRecipeException e) {
+//                   throw new RuntimeException(e);
+//               }
+//           }).collect(Collectors.toList());
+//       }
+//       return userRecipes;
+//   }
+
+    }
 
 
 
