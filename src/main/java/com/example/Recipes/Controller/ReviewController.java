@@ -3,12 +3,16 @@ package com.example.Recipes.Controller;
 
 import com.example.Recipes.Exceptions.NoSuchRecipeException;
 import com.example.Recipes.Exceptions.NoSuchReviewException;
+import com.example.Recipes.Models.CustomUserDetails;
 import com.example.Recipes.Models.Recipe;
 import com.example.Recipes.Models.Review;
 import com.example.Recipes.Service.RecipeService;
 import com.example.Recipes.Service.ReviewService;
+import jdk.jshell.spi.ExecutionControl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,35 +56,35 @@ import java.util.List;
         }
     }
 
-    @PostMapping("/{recipeId}")
-    public ResponseEntity<?> postNewReview(@RequestBody Review review, @PathVariable("recipeId") Long recipeId) {
-        try {
-            Recipe insertedRecipe = reviewService.postNewReview(review, recipeId);
-            return ResponseEntity.created(insertedRecipe.getLocationURI()).body(insertedRecipe);
-        } catch (NoSuchRecipeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @PostMapping("/{recipeId}")
+//    public ResponseEntity<?> postNewReview(@RequestBody Review review, @PathVariable("recipeId") Long recipeId) {
+//        try {
+//            Recipe insertedRecipe = reviewService.postNewReview(review, recipeId);
+//            return ResponseEntity.created(insertedRecipe.getLocationURI()).body(insertedRecipe);
+//        } catch (NoSuchRecipeException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteReviewById(@PathVariable("id") Long id) {
-        try {
-            Review review = reviewService.deleteReviewById(id);
-            return ResponseEntity.ok(review);
-        } catch (NoSuchReviewException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PatchMapping
-    public ResponseEntity<?> updateReviewById(@RequestBody Review reviewToUpdate) {
-        try {
-            Review review = reviewService.updateReviewById(reviewToUpdate);
-            return ResponseEntity.ok(review);
-        } catch (NoSuchReviewException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<?> deleteReviewById(@PathVariable("id") Long id) {
+//        try {
+//            Review review = reviewService.deleteReviewById(id);
+//            return ResponseEntity.ok(review);
+//        } catch (NoSuchReviewException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
+//
+//    @PatchMapping
+//    public ResponseEntity<?> updateReviewById(@RequestBody Review reviewToUpdate) {
+//        try {
+//            Review review = reviewService.updateReviewById(reviewToUpdate);
+//            return ResponseEntity.ok(review);
+//        } catch (NoSuchReviewException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
     //QUESTION 6
     @GetMapping("reviews/{userName}")
@@ -98,7 +102,40 @@ import java.util.List;
         return (ResponseEntity<String>) ResponseEntity.ok("Review submitted successfully!");
 
         }
+    @PostMapping("/{recipeId}")
+    public ResponseEntity<?> postNewReview(@RequestBody Review review,
+                                           @PathVariable("recipeId") Long recipeId, Authentication authentication) {
+        try {
+            review.setUser((CustomUserDetails) authentication.getPrincipal());
+            Recipe insertedRecipe = reviewService.postNewReview(review, recipeId);
+            return ResponseEntity.created(insertedRecipe.getLocationURI()).body(insertedRecipe);
+        } catch (NoSuchRecipeException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission(#id, 'Review', 'delete')")
+    public ResponseEntity<?> deleteReviewById(@PathVariable("id")Long id) {
+        try {
+            Review review = reviewService.deleteReviewById(id);
+            return ResponseEntity.ok(review);
+        } catch (NoSuchReviewException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping
+    @PreAuthorize("hasPermission(#reviewToUpdate.id, 'Review', 'edit')")
+    public ResponseEntity<?> updateReviewById(@RequestBody Review reviewToUpdate) {
+        try {
+            Review review = reviewService.updateReviewById(reviewToUpdate);
+            return ResponseEntity.ok(review);
+        } catch (NoSuchReviewException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+}
 
 
 

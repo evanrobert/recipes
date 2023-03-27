@@ -28,6 +28,14 @@ public class Recipe {
     @Column(nullable = false)
     private String userName;
 
+    @ManyToOne(optional = false)
+    @JoinColumn
+    @JsonIgnore
+    private CustomUserDetails user;
+
+    public String getAuthor() {
+        return user.getUsername();
+    }
     @Column(nullable = false)
     private String name;
 

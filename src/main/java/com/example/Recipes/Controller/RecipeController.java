@@ -1,12 +1,15 @@
 package com.example.Recipes.Controller;
 
 import com.example.Recipes.Exceptions.NoSuchRecipeException;
+import com.example.Recipes.Models.CustomUserDetails;
 import com.example.Recipes.Models.Recipe;
 
 import com.example.Recipes.Service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -19,15 +22,15 @@ public class RecipeController {
     @Autowired
     RecipeService recipeService;
 
-    @PostMapping
-    public ResponseEntity<?> createNewRecipe(@RequestBody Recipe recipe) {
-        try {
-            Recipe insertedRecipe = recipeService.createNewRecipe(recipe);
-            return ResponseEntity.created(insertedRecipe.getLocationURI()).body(insertedRecipe);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @PostMapping
+//    public ResponseEntity<?> createNewRecipe(@RequestBody Recipe recipe) {
+//        try {
+//            Recipe insertedRecipe = recipeService.createNewRecipe(recipe);
+//            return ResponseEntity.created(insertedRecipe.getLocationURI()).body(insertedRecipe);
+//        } catch (IllegalStateException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getRecipeById(@PathVariable("id") Long id) {
@@ -58,26 +61,26 @@ public class RecipeController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRecipeById(@PathVariable("id") Long id) {
-        try {
-            Recipe deletedRecipe = recipeService.deleteRecipeById(id);
-            return ResponseEntity.ok("The recipe with ID " + deletedRecipe.getId() + " and name " + deletedRecipe.getName() + " was deleted");
-        } catch (NoSuchRecipeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PatchMapping
-    public ResponseEntity<?> updateRecipe(@RequestBody Recipe updatedRecipe) {
-        try {
-            Recipe returnedUpdatedRecipe = recipeService.updateRecipe(updatedRecipe, true);
-            return ResponseEntity.ok(returnedUpdatedRecipe);
-        } catch (NoSuchRecipeException | IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-
-    }
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<?> deleteRecipeById(@PathVariable("id") Long id) {
+//        try {
+//            Recipe deletedRecipe = recipeService.deleteRecipeById(id);
+//            return ResponseEntity.ok("The recipe with ID " + deletedRecipe.getId() + " and name " + deletedRecipe.getName() + " was deleted");
+//        } catch (NoSuchRecipeException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
+//
+//    @PatchMapping
+//    public ResponseEntity<?> updateRecipe(@RequestBody Recipe updatedRecipe) {
+//        try {
+//            Recipe returnedUpdatedRecipe = recipeService.updateRecipe(updatedRecipe, true);
+//            return ResponseEntity.ok(returnedUpdatedRecipe);
+//        } catch (NoSuchRecipeException | IllegalStateException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//
+//    }
 
 
 
@@ -112,22 +115,42 @@ public class RecipeController {
 
         return filter;
     }
+    @PostMapping
+    public ResponseEntity<?> createNewRecipe(@RequestBody Recipe recipe, Authentication authentication) {
+        try {
+            recipe.setUser((CustomUserDetails) authentication.getPrincipal());
+            Recipe insertedRecipe = recipeService.createNewRecipe(recipe);
+            return ResponseEntity.created(insertedRecipe.getLocationURI()).body(insertedRecipe);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
-   // Question 6
-//   @GetMapping("/search/{userName}")
-//   public List<Recipe> getRecipeByUsername(@PathVariable String userName, @RequestParam(required = false) Double rating) throws NoSuchRecipeException {
-//       List<Recipe> userRecipes = recipeService.getRecipeByUserName(userName);
-//       if (rating != null) {
-//           userRecipes = userRecipes.stream().filter(recipe -> {
-//               try {
-//                   return recipeService.averageReview(recipe) >= rating;
-//               } catch (NoSuchRecipeException e) {
-//                   throw new RuntimeException(e);
-//               }
-//           }).collect(Collectors.toList());
-//       }
-//       return userRecipes;
-//   }
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasPermission(#id, 'Recipe', 'delete')")
+    //make sure that a user is either an admin or the owner of the recipe before they are allowed to delete
+    public ResponseEntity<?> deleteRecipeById(@PathVariable("id") Long id) {
+        try {
+            Recipe deletedRecipe = recipeService.deleteRecipeById(id);
+            return ResponseEntity.ok("The recipe with ID " + deletedRecipe.getId() + " and name " + deletedRecipe.getName() + " was deleted");
+        } catch (NoSuchRecipeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping
+    //make sure that a user is either an admin or the owner of the recipe before they are allowed to update
+    @PreAuthorize("hasPermission(#updatedRecipe.id, 'Recipe', 'edit')")
+    public ResponseEntity<?> updateRecipe(@RequestBody Recipe updatedRecipe) {
+        try {
+            Recipe returnedUpdatedRecipe = recipeService.updateRecipe(updatedRecipe, true);
+            return ResponseEntity.ok(returnedUpdatedRecipe);
+        } catch (NoSuchRecipeException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
 
     }
 
