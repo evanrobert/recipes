@@ -1,7 +1,7 @@
 package com.example.Recipes.Controller;
 
 import com.example.Recipes.Models.CustomUserDetails;
-import com.example.Recipes.Service.CustomUserDetailsService;
+import com.example.Recipes.Security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

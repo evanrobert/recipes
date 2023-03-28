@@ -7,41 +7,51 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "recipe")
 public class Review {
+
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private String username;
-
 
     @ManyToOne(optional = false)
     @JoinColumn
     @JsonIgnore
     private CustomUserDetails user;
-    public String getAuthor() {
-        return user.getUsername();
-    }
 
+
+    @Column(nullable = false)
     private int rating;
 
-    @NotNull
     private String description;
-//Question 8
-    public void setRating(int rating) {
-        if (rating <= 1 || rating > 10) {
 
-            throw new IllegalStateException("Rating must be between 0 and 10.");
+    @ManyToOne
+    @JoinColumn(
+            name = "recipeId",
+            nullable = false,
+            foreignKey = @ForeignKey
+    )
+    @JsonIgnore
+    private Recipe recipe;
+
+    public void setRating(int rating) {
+        if(rating <= 0 || rating > 10) {
+            throw new IllegalStateException("Rating must be between 0 and 10");
         }
         this.rating = rating;
     }
 
-
+    public String getAuthor() {
+        return user.getUsername();
+    }
 }
+
 
 
